@@ -1,0 +1,59 @@
+import os
+import asyncio
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+
+from fastapi import Depends, HTTPException, status
+
+
+from config.settings import TestingSettings, Settings, BaseAppSettings
+from security.interfaces import JWTAuthManagerInterface
+from security.token_manager import JWTAuthManager
+from security.http import get_token
+from sqlalchemy.orm import joinedload, selectinload
+
+
+def get_settings() -> BaseAppSettings:
+    environment = os.getenv("ENVIRONMENT", "developing")
+    if environment == "testing":
+        return TestingSettings()
+    return Settings()
+
+
+def get_jwt_auth_manager(
+    settings: BaseAppSettings = Depends(get_settings),
+) -> JWTAuthManagerInterface:
+    return JWTAuthManager(
+        secret_key_access=settings.SECRET_KEY_ACCESS,
+        secret_key_refresh=settings.SECRET_KEY_REFRESH,
+        algorithm=settings.JWT_SIGNING_ALGORITHM,
+    )
+
+
+async def get_current_user(token: str = Depends(get_token), settings: Settings = Depends(get_settings)):
+    from database import get_db
+    from database.models.accounts import UserModel
+
+    db: AsyncSession = await anext(get_db())
+    try:
+        payload = JWTAuthManager(
+            secret_key_access=settings.SECRET_KEY_ACCESS,
+            secret_key_refresh=settings.SECRET_KEY_REFRESH,
+            algorithm=settings.JWT_SIGNING_ALGORITHM,
+        ).decode_access_token(token)
+
+        user_id = payload.get("user_id")
+        if user_id is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+
+        result = await db.execute(select(UserModel).filter(UserModel.id == user_id))
+        user = result.scalars().first()
+
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+
+        return user
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Could not validate token: {str(e)}")
