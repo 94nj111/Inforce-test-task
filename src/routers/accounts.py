@@ -1,44 +1,33 @@
-from datetime import datetime, timezone
-from typing import cast
 
+from config import (
+    BaseAppSettings,
+    get_jwt_auth_manager,
+    get_settings,
+)
+from database import get_db
+from database.models.accounts import (
+    RefreshTokenModel,
+    UserModel,
+)
+from exceptions import BaseSecurityError
 from fastapi import (
     APIRouter,
     Depends,
-    status,
     HTTPException,
+    status,
 )
+from schemas.accounts import (
+    TokenRefreshRequestSchema,
+    TokenRefreshResponseSchema,
+    UserLoginRequestSchema,
+    UserLoginResponseSchema,
+    UserRegistrationRequestSchema,
+    UserRegistrationResponseSchema,
+)
+from security.interfaces import JWTAuthManagerInterface
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import delete
-from sqlalchemy.orm import selectinload
-
-from config import (
-    get_jwt_auth_manager,
-    get_settings,
-    BaseAppSettings,
-)
-
-
-from database import get_db
-from config.dependencies import get_current_user
-from database.models.accounts import (
-    UserModel,
-    RefreshTokenModel,
-)
-from exceptions import BaseSecurityError
-from schemas.accounts import (
-    UserRegistrationRequestSchema,
-    UserRegistrationResponseSchema,
-    UserLoginResponseSchema,
-    UserLoginRequestSchema,
-    TokenRefreshRequestSchema,
-    TokenRefreshResponseSchema,
-)
-from security.interfaces import JWTAuthManagerInterface
-from security.passwords import pwd_context
-from database.validators.accounts import validate_password_strength
-
 
 router = APIRouter(tags=["accounts"])
 

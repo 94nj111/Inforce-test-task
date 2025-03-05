@@ -1,18 +1,17 @@
 from datetime import datetime, timedelta, timezone
 from typing import List
 
-from sqlalchemy import (
-    ForeignKey,
-    String,
-    DateTime,
-    Integer,
-)
-from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
-
 from database.models import Base
 from database.validators import accounts as validators
 from security.passwords import hash_password, verify_password
 from security.utils import generate_secure_token
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 
 class UserModel(Base):

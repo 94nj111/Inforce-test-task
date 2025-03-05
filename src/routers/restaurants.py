@@ -1,44 +1,30 @@
-from datetime import datetime, timezone, date, timedelta
-from typing import cast, List
+from datetime import date, timedelta
+from typing import List
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    status,
-    HTTPException,
-)
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy import func
-from sqlalchemy.orm import selectinload
-
-from config import (
-    get_jwt_auth_manager,
-    get_settings,
-    BaseAppSettings,
-)
-
-
-from database import get_db
 from config.dependencies import get_current_user
+from database import get_db
 from database.models.accounts import (
     UserModel,
 )
-from database.models.restauratns import RestaurantModel, MenuModel, LikeModel
-from exceptions import BaseSecurityError
+from database.models.restauratns import LikeModel, MenuModel, RestaurantModel
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    status,
+)
 from schemas.restaurants import (
-    RestaurantResponseSchema,
-    RestaurantCreateSchema,
-    MenuCreateSchema,
-    MenuResponseSchema,
     LikeCreateSchema,
     LikeResponseSchema,
+    MenuCreateSchema,
+    MenuResponseSchema,
+    RestaurantCreateSchema,
+    RestaurantResponseSchema,
 )
-from security.interfaces import JWTAuthManagerInterface
-from security.passwords import pwd_context
-from database.validators.accounts import validate_password_strength
-
+from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 router = APIRouter()
 

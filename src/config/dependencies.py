@@ -1,17 +1,12 @@
 import os
-import asyncio
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-
+from config.settings import BaseAppSettings, Settings, TestingSettings
 from fastapi import Depends, HTTPException, status
-
-
-from config.settings import TestingSettings, Settings, BaseAppSettings
+from security.http import get_token
 from security.interfaces import JWTAuthManagerInterface
 from security.token_manager import JWTAuthManager
-from security.http import get_token
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 
 def get_settings() -> BaseAppSettings:
