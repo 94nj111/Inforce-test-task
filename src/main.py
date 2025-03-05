@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from routers.accounts import router as accounts_router
 from routers.restaurants import router as restaurants_router
 

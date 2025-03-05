@@ -1,18 +1,23 @@
 from datetime import date, timedelta
 from typing import List
 
-from config.dependencies import get_current_user
-from database import get_db
-from database.models.accounts import (
-    UserModel,
-)
-from database.models.restauratns import LikeModel, MenuModel, RestaurantModel
 from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
     status,
 )
+from sqlalchemy import func
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+
+from config.dependencies import get_current_user
+from database import get_db
+from database.models.accounts import (
+    UserModel,
+)
+from database.models.restauratns import LikeModel, MenuModel, RestaurantModel
 from schemas.restaurants import (
     LikeCreateSchema,
     LikeResponseSchema,
@@ -21,10 +26,6 @@ from schemas.restaurants import (
     RestaurantCreateSchema,
     RestaurantResponseSchema,
 )
-from sqlalchemy import func
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 
 router = APIRouter()
 
@@ -138,9 +139,17 @@ async def create_menu(
     summary="Get Today's Menus",
     status_code=status.HTTP_200_OK,
     tags=["menus"],
+    responses={
+        404: {
+            "description": "Not Found - No menus found for today.",
+            "content": {"application/json": {"example": {"detail": "No menus found for today."}}},
+        }
+    },
 )
-async def get_today_menus_ordered_by_likes(db: AsyncSession = Depends(get_db)):
-
+async def get_today_menus_ordered_by_likes(
+    db: AsyncSession = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+) -> List[MenuResponseSchema]:
     today = date.today()
 
     query = (

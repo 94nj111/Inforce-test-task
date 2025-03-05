@@ -37,9 +37,9 @@ select = [
     "F",
 ]
 
-ignore = []
+ignore = ["F821", "E402"]
 
-src = ["."]
+src = ["src"]
 
 fix = true
 

@@ -1,3 +1,12 @@
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    status,
+)
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 from config import (
     BaseAppSettings,
@@ -10,12 +19,6 @@ from database.models.accounts import (
     UserModel,
 )
 from exceptions import BaseSecurityError
-from fastapi import (
-    APIRouter,
-    Depends,
-    HTTPException,
-    status,
-)
 from schemas.accounts import (
     TokenRefreshRequestSchema,
     TokenRefreshResponseSchema,
@@ -25,9 +28,6 @@ from schemas.accounts import (
     UserRegistrationResponseSchema,
 )
 from security.interfaces import JWTAuthManagerInterface
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 
 router = APIRouter(tags=["accounts"])
 
