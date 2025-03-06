@@ -6,6 +6,7 @@ from fastapi import (
     Depends,
     HTTPException,
     status,
+    Header
 )
 from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
@@ -82,10 +83,15 @@ async def create_restaurant(
 async def get_restaurants(
     current_user: UserModel = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    mobile_version: str = Header(None, alias="X-Mobile-Version")
 ) -> List[RestaurantResponseSchema]:
     """
     Get all restaurants.
     """
+    if mobile_version == "1.0":
+        pass
+    if mobile_version == "2.0":
+        pass
     result = await db.execute(select(RestaurantModel))
     restaurants = result.scalars().all()
     return restaurants

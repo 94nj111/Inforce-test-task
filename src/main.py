@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from routers.accounts import router as accounts_router
 from routers.restaurants import router as restaurants_router
 
-app = FastAPI(title="restaurant", version="0.1.0", description="Inforce Test Task")
+app = FastAPI(title="restaurant", version="0.1.0", description="Inforce Test Task", openapi_prefix="/api/v1")
 app.include_router(accounts_router)
 app.include_router(restaurants_router)
 
