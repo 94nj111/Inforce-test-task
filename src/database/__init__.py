@@ -1,6 +1,15 @@
-from database.session_postgresql import (
-    get_postgresql_db as get_db,  # noqa
-)
-from database.session_postgresql import (
-    get_postgresql_db_contextmanager as get_db_contextmanager,  # noqa
-)
+import os
+
+
+environment = os.getenv("ENVIRONMENT", "developing")
+
+if environment == "testing":
+    from database.session_sqlite import (
+        get_sqlite_db_contextmanager as get_db_contextmanager,
+        get_sqlite_db as get_db,
+    )
+else:
+    from database.session_postgresql import (
+        get_postgresql_db_contextmanager as get_db_contextmanager,
+        get_postgresql_db as get_db,
+    )

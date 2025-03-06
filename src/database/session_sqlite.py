@@ -1,0 +1,32 @@
+from contextlib import asynccontextmanager
+
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+
+from src.config.dependencies import get_settings
+from database.models import Base
+
+settings = get_settings()
+
+TESTING = settings.__class__.__name__ == "TestingSettings"
+SQLITE_DATABASE_URL = (
+    "sqlite+aiosqlite:///:memory:" if TESTING else f"sqlite+aiosqlite:///{settings.PATH_TO_DB}"
+)
+sqlite_engine = create_async_engine(SQLITE_DATABASE_URL, connect_args={"check_same_thread": False})
+SqliteSessionLocal = async_sessionmaker(bind=sqlite_engine, autocommit=False, autoflush=False, expire_on_commit=False)
+
+
+async def get_sqlite_db() -> AsyncSession:
+    async with SqliteSessionLocal() as db:
+        yield db
+
+
+@asynccontextmanager
+async def get_sqlite_db_contextmanager() -> AsyncSession:
+    async with SqliteSessionLocal() as db:
+        yield db
+
+
+async def reset_sqlite_database():
+    async with sqlite_engine.begin() as conn:
+        conn.run_sync(Base.metadata.drop_all)
+        conn.run_sync(Base.metadata.create_all)
